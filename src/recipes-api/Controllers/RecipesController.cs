@@ -23,24 +23,71 @@ public class RecipesController : ControllerBase
     // 1 - Sua aplicação deve ter o endpoint GET /recipe
     //Read
     [HttpGet]
-    public IActionResult Get()
+    public IActionResult GetRecipe()
     {
-        throw new NotImplementedException();    
+        IActionResult result;
+        try
+        {
+            var recipes = _service.GetRecipes();
+            result = Ok(recipes);
+        }
+        catch (Exception ex)
+        {
+            result = StatusCode(500, $"Erro ao buscar as receitas: {ex.Message}");
+        }
+        return result;
     }
+
 
     // 2 - Sua aplicação deve ter o endpoint GET /recipe/:name
     //Read
     [HttpGet("{name}", Name = "GetRecipe")]
-    public IActionResult Get(string name)
-    {                
-        throw new NotImplementedException();
+    public IActionResult GetRecipe(string name)
+    {
+        IActionResult result;
+        try
+        {
+            var recipe = _service.GetRecipe(name); 
+
+            if (recipe == null)
+            {
+                result = NotFound();
+            }
+            else
+            {
+                result = Ok(recipe);
+            }
+        }
+        catch (Exception ex)
+        {
+            result = StatusCode(500, $"Erro ao buscar a receita: {ex.Message}");
+        }
+        return result;
     }
+
 
     // 3 - Sua aplicação deve ter o endpoint POST /recipe
     [HttpPost]
-    public IActionResult Create([FromBody]Recipe recipe)
+    public IActionResult Post([FromBody] Recipe recipe)
     {
-        throw new NotImplementedException();
+        IActionResult result;
+        try
+        {
+            if (recipe == null)
+            {
+                result = BadRequest("O corpo da requisição não pode estar vazio");
+            }
+            else
+            {
+                _service.AddRecipe(recipe);
+                result = CreatedAtAction(nameof(GetRecipe), new { name = recipe.Name }, recipe);
+            }
+        }
+        catch (Exception ex)
+        {
+            result = StatusCode(500, $"Erro ao adicionar a receita: {ex.Message}");
+        }
+        return result;
     }
 
     // 4 - Sua aplicação deve ter o endpoint PUT /recipe
