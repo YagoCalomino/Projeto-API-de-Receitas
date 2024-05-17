@@ -92,15 +92,57 @@ public class RecipesController : ControllerBase
 
     // 4 - Sua aplicação deve ter o endpoint PUT /recipe
     [HttpPut("{name}")]
-    public IActionResult Update(string name, [FromBody]Recipe recipe)
+    public IActionResult Update(string name, [FromBody] Recipe recipe)
     {
-        throw new NotImplementedException();
+        IActionResult result;
+        try
+        {
+            if (recipe == null)
+            {
+                result = BadRequest("Recipe is null.");
+            }
+            else
+            {
+                var existentRecipe = _service.RecipeExists(name);
+                if (!existentRecipe)
+                {
+                    result = NotFound("Recipe not found");
+                }
+                else
+                {
+                    _service.UpdateRecipe(recipe);
+                    result = NoContent();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            result = BadRequest(ex.Message);
+        }
+        return result;
     }
 
     // 5 - Sua aplicação deve ter o endpoint DEL /recipe
     [HttpDelete("{name}")]
     public IActionResult Delete(string name)
     {
-        throw new NotImplementedException();
-    }    
+        IActionResult result;
+        try
+        {
+            if (!_service.RecipeExists(name))
+            {
+                result = NotFound($"A receita com o nome '{name}' não foi encontrada");
+            }
+            else
+            {
+                _service.DeleteRecipe(name);
+                result = NoContent();
+            }
+        }
+        catch (Exception ex)
+        {
+            result = StatusCode(500, $"Erro ao excluir a receita: {ex.Message}");
+        }
+        return result;
+    }
 }
