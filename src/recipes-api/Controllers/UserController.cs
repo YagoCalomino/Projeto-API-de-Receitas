@@ -91,6 +91,23 @@ public class UserController : ControllerBase
     [HttpDelete("{email}")]
     public IActionResult Delete(string email)
     {
-        throw new NotImplementedException();
-    } 
+        IActionResult result;
+        try
+        {
+            if (!_service.UserExists(email))
+            {
+                result = NotFound($"A pessoa usuária com o e-mail '{email}' não foi encontrada");
+            }
+            else
+            {
+                _service.DeleteUser(email);
+                result = NoContent();
+            }
+        }
+        catch (Exception ex)
+        {
+            result = StatusCode(500, $"Erro ao excluir a pessoa usuária: {ex.Message}");
+        }
+        return result;
+    }
 }
